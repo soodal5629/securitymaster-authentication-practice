@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .navbar-custom .navbar-brand, .navbar-custom .nav-link {
+            color: #fff
+        }
+        .sidebar {
+            background-color: #212338;
+            min-height: 100vh;
+            color: #fff;
+        }
+        .sidebar a {
+            color: #fff;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .sidebar a:hover{
+            background-color: #4e73df;
+            color: #fff;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div th:replace="~{layout/header::header}"></div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2 sidebar">
+            <div th:replace="~{layout/sidebar::sidebar}"></div>
+        </div>
+        <div class="col-md-10 content">
+            <div th:replace="~{content/admincontent}"></div>
+        </div>
+    </div>
+</div>
+<div class="footer" th:replace="~{layout/footer::footer}"></div>
+</body>
+</html>
