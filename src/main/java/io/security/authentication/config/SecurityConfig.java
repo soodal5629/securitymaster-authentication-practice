@@ -1,5 +1,6 @@
 package io.security.authentication.config;
 
+import io.security.authentication.handler.FormAccessDeniedHandler;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -32,6 +33,9 @@ public class SecurityConfig {
         http.authorizeHttpRequests(auth -> auth
                                 .requestMatchers("/css/**", "/images/**", "/js/**", "/favicon.*", "/*/icon-*").permitAll() // 정적 자원 설정
                 .requestMatchers("/", "/signup", "/login*").permitAll()
+                .requestMatchers("/user").hasRole("USER")
+                .requestMatchers("/manager").hasRole("MANAGER")
+                .requestMatchers("/admin").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 )
             .formLogin(form -> form
@@ -41,6 +45,7 @@ public class SecurityConfig {
                     .failureHandler(failureHandler)
             )
             .authenticationProvider(authenticationProvider)
+            .exceptionHandling(e -> e.accessDeniedHandler(new FormAccessDeniedHandler("/denied")))
             //.userDetailsService(userDetailsService)
         ;
         return http.build();

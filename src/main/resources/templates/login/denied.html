@@ -65,10 +65,6 @@
             border-radius: 5px;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
         }
-        .login-form h2 {
-            color: #fff;
-            margin-bottom: 20px;
-        }
         .login-form .form-control {
             background-color: #3a3b45;
             color: #fff;
@@ -80,6 +76,9 @@
         }
         button {
             cursor: pointer;
+        }
+        h3, span {
+            color: white;
         }
     </style>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
@@ -94,25 +93,10 @@
             <div th:replace="~{layout/sidebar::sidebar}"></div>
         </div>
         <div class="col-md-10 content">
-            <div class="login-form">
-                <h2>Login</h2>
-                <!-- 로그인 실패하면 시큐리티가 localhost:8080/login 뒤에
-                파라미터 ?error 를 자동으로 붙여주기 때문에 localhost:8080/login?error 로 리다이렉트 되는데 이 파라미터의 유무에 따라 해당 div 가시화가 결정됨-->
-                <div th:if="${param.error}" class="form-group">
-                    <span th:text="${exception}?: '잘못된 아이디나 암호입니다'" class="alert alert-danger"></span>
-                </div>
-                <form th:action="@{/login}" method="post"> <!-- 타임리프가 post 요청에 따라 알아서 csrf 토큰 관련 태그 생성해줌-->
-                    <input type="hidden" th:value="secret" th:name="secret_key" />
-                    <div class="form-group">
-                        <label for="username">Username</label>
-                        <input type="text" class="form-control" id="username" name="username" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Login</button>
-                </form>
+            <div>
+                <h3 th:text="${exception}"></h3>
+                <br/>
+                <span th:text="${username} != null ? ${username} + ' 님은 접근 권한이 없습니다': '비정상적인 접근입니다'"></span>
             </div>
         </div>
     </div>
