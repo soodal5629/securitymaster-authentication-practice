@@ -3,11 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <title>Dashboard</title>
+    <style>
+        .body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #1e1e2f;
+            color: #abb2bf;
+        }
+        .navbar-custom {
+            background-color: #212338;
+            color: #fff;
+            margin-bottom: 0;
+        }
+        .container-fluid {
+            padding: 0;
+        }
+        .navbar-custom .navbar-brand, .navbar-custom .nav-link {
+            color: #fff;
+        }
+        .sidebar {
+            background-color: #212338;
+            min-height: 100vh;
+            color: #fff;
+        }
+        .sidebar a {
+            color: #fff;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .sidebar a:hover {
+            background-color: #4e73df;
+            color: #fff;
+        }
+        .content {
+            padding: 20px;
+            background-color: #282a36;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            margin-top: 0;
+        }
+        .footer {
+            background-color: #212338;
+            color: #fff;
+            padding: 10px 0;
+            border-top: 1px solid #282a36;
+        }
+        .sidebar .list-group-item {
+            color: white;
+            background-color: transparent;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .sidebar .list-group-item:hover {
+            background-color: #4e73df;
+            color: #fff;
+        }
+        .login-form {
+            max-width: 400px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: #2e2e2e;
+            border-radius: 5px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        }
+        .login-form h2 {
+            color: #fff;
+            margin-bottom: 20px;
+        }
+        .login-form .form-control {
+            background-color: #3a3b45;
+            color: #fff;
+            border: none;
+        }
+        .login-form .btn-primary {
+            background-color: #4e73df;
+            border: none;
+        }
+        button {
+            cursor: pointer;
+        }
+        h2, p {
+            color: white;
+        }
+    </style>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </head>
 <body>
 <div th:replace="~{layout/header::header}"></div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2 sidebar">
+            <div th:replace="~{layout/sidebar::sidebar}"></div>
+        </div>
+        <div class="col-md-10 content">
+            <div>
+                <h2>대시보드</h2>
+                <p id="content">환영합니다! 여기에 대시보드 관련 정보와 분석 데이터가 표시됩니다.</p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="footer" th:replace="~{layout/footer::footer}"></div>
 </body>
 </html>

@@ -1,7 +1,9 @@
 package io.security.authentication.config;
 
+import io.security.authentication.entrypoint.RestAuthenticationEntryPoint;
 import io.security.authentication.filters.RestAuthenticationFilter;
 import io.security.authentication.handler.FormAccessDeniedHandler;
+import io.security.authentication.handler.RestAccessDeniedHandler;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -29,7 +31,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetails;
 @RequiredArgsConstructor
 public class SecurityConfig {
     // private final UserDetailsService userDetailsService;
-    private final AuthenticationProvider authenticationProvider;
+    private final AuthenticationProvider formAuthenticationProvider;
     private final AuthenticationDetailsSource<HttpServletRequest, WebAuthenticationDetails> authenticationDetailsSource;
     private final AuthenticationSuccessHandler successHandler;
     private final AuthenticationFailureHandler failureHandler;
@@ -55,7 +57,7 @@ public class SecurityConfig {
                     .failureHandler(failureHandler)
 
             )
-            .authenticationProvider(authenticationProvider)
+            .authenticationProvider(formAuthenticationProvider)
             .exceptionHandling(e -> e.accessDeniedHandler(new FormAccessDeniedHandler("/denied")))
             //.userDetailsService(userDetailsService)
         ;
@@ -74,11 +76,19 @@ public class SecurityConfig {
                 .securityMatcher("/api/**")
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/images/**", "/js/**", "/favicon.*", "/*/icon-*").permitAll() // 정적 자원 설정
-                        .anyRequest().permitAll()
+                        .requestMatchers("/api", "/api/login").permitAll()
+                        .requestMatchers("/api/user").hasRole("USER")
+                        .requestMatchers("/api/manager").hasRole("MANAGER")
+                        .requestMatchers("/api/admin").hasRole("ADMIN")
+                        .anyRequest().authenticated()
                 )
-            .csrf(AbstractHttpConfigurer::disable)
-            .addFilterBefore(restAuthenticationFilter(http, authenticationManager), UsernamePasswordAuthenticationFilter.class)
-            .authenticationManager(authenticationManager)
+                .csrf(AbstractHttpConfigurer::disable)
+                .addFilterBefore(restAuthenticationFilter(http, authenticationManager), UsernamePasswordAuthenticationFilter.class)
+                .authenticationManager(authenticationManager)
+                .exceptionHandling(e -> e
+                        .authenticationEntryPoint(new RestAuthenticationEntryPoint())
+                        .accessDeniedHandler(new RestAccessDeniedHandler())
+                )
         ;
         return http.build();
     }
