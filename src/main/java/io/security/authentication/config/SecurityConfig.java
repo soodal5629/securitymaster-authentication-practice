@@ -34,6 +34,8 @@ public class SecurityConfig {
     private final AuthenticationSuccessHandler successHandler;
     private final AuthenticationFailureHandler failureHandler;
 
+    private final AuthenticationProvider restAuthenticationProvider;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth -> auth
@@ -63,6 +65,7 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain restSecurityFilterChain(HttpSecurity http) throws Exception {
         AuthenticationManagerBuilder managerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        managerBuilder.authenticationProvider(restAuthenticationProvider);
         AuthenticationManager authenticationManager = managerBuilder.build();
 
         http
