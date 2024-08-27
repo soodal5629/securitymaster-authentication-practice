@@ -48,4 +48,12 @@ public class LoginController {
 
         return "login/denied";
     }
+
+    @GetMapping("/api/login")
+    public String restLogin(@RequestParam(required = false) String error, @RequestParam(required = false) String exception, Model model) {
+        model.addAttribute("error", error);
+        model.addAttribute("exception", exception);
+
+        return "rest/login";
+    }
 }

@@ -2,7 +2,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/testdb
     username: test
-    password: test
+    password: ldcc!2626
   jpa:
     hibernate:
       ddl-auto: update
