@@ -2,7 +2,7 @@ package io.security.authentication.users.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.security.authentication.domain.dto.AccountDTO;
-import io.security.authentication.domain.entity.Account;
+import io.security.authentication.admin.domain.entity.Account;
 import io.security.authentication.users.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
