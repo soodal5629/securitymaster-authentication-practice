@@ -2,6 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
     <title>Title</title>
     <style>
         .body {
@@ -85,13 +87,17 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <script>
         function login() {
+            const csrfHeader = $('meta[name="_csrf_header"]').attr('content');
+            const csrfToken = $('meta[name="_csrf"]').attr('content');
+
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-            fetch('http://localhost:8080/api/login', {
+            fetch('/api/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'  // Ajax 통신임을 서버측에 전달하기 위한 헤더 설정
+                    'X-Requested-With': 'XMLHttpRequest',  // Ajax 통신임을 서버측에 전달하기 위한 헤더 설정
+                    [csrfHeader]: csrfToken // 헤더에 csrf 토큰 넣어주기
                 },
                 body: JSON.stringify({ username, password }),
             })
