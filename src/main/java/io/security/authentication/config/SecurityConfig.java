@@ -1,14 +1,19 @@
 package io.security.authentication.config;
 
+import io.security.authentication.dsl.RestApiDsl;
 import io.security.authentication.entrypoint.RestAuthenticationEntryPoint;
 import io.security.authentication.filters.RestAuthenticationFilter;
 import io.security.authentication.handler.FormAccessDeniedHandler;
+import io.security.authentication.handler.FormAuthenticationFailureHandler;
+import io.security.authentication.handler.FormAuthenticationSuccessHandler;
 import io.security.authentication.handler.RestAccessDeniedHandler;
+import io.security.authentication.provider.FormAuthenticationProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -31,10 +36,10 @@ import org.springframework.security.web.authentication.WebAuthenticationDetails;
 @RequiredArgsConstructor
 public class SecurityConfig {
     // private final UserDetailsService userDetailsService;
-    private final AuthenticationProvider formAuthenticationProvider;
+    private final FormAuthenticationProvider formAuthenticationProvider;
     private final AuthenticationDetailsSource<HttpServletRequest, WebAuthenticationDetails> authenticationDetailsSource;
-    private final AuthenticationSuccessHandler successHandler;
-    private final AuthenticationFailureHandler failureHandler;
+    private final FormAuthenticationSuccessHandler successHandler;
+    private final FormAuthenticationFailureHandler failureHandler;
 
     private final AuthenticationProvider restAuthenticationProvider;
     private final AuthenticationSuccessHandler restSuccessHandler;
@@ -83,11 +88,18 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 //.csrf(AbstractHttpConfigurer::disable)
-                .addFilterBefore(restAuthenticationFilter(http, authenticationManager), UsernamePasswordAuthenticationFilter.class)
+                // DSL 사용하기 때문에 해당 코드 주석 처리
+                //.addFilterBefore(restAuthenticationFilter(http, authenticationManager), UsernamePasswordAuthenticationFilter.class)
                 .authenticationManager(authenticationManager)
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint(new RestAuthenticationEntryPoint())
                         .accessDeniedHandler(new RestAccessDeniedHandler())
+                )
+                .with(new RestApiDsl<>(), restDsl -> restDsl
+                        .restSuccessHandler(restSuccessHandler)
+                        .restFailureHandler(restFailureHandler)
+                        .loginPage("/api/login")
+                        .loginProcessingUrl("/api/login")
                 )
         ;
         return http.build();

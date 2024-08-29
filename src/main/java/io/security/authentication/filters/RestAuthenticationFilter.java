@@ -26,13 +26,20 @@ import java.io.IOException;
 public class RestAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    /**
+     * DSL 만들면서 새로 구성한 생성자
+     */
+    public RestAuthenticationFilter() {
+        super(new AntPathRequestMatcher("/api/login", "POST"));
+    }
+
     public RestAuthenticationFilter(HttpSecurity http) {
         super(new AntPathRequestMatcher("/api/login", "POST"));
         setSecurityContextRepository(getSecurityContextRepository(http));
     }
 
     // 인증 객체를 세션에 저장하도록 처리
-    private SecurityContextRepository getSecurityContextRepository(HttpSecurity http) {
+    public SecurityContextRepository getSecurityContextRepository(HttpSecurity http) {
         SecurityContextRepository securityContextRepository = http.getSharedObject(SecurityContextRepository.class);
         if(securityContextRepository == null) {
             return new DelegatingSecurityContextRepository(new RequestAttributeSecurityContextRepository(), new HttpSessionSecurityContextRepository());
