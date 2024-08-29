@@ -76,7 +76,7 @@
             background-color: #4e73df;
             border: none;
         }
-        button {
+        button, a {
             cursor: pointer;
         }
         h2, p {
@@ -106,6 +106,23 @@
                         document.querySelector("#content").textContent=response.status;
                     }
                 })
+        }
+
+        function logout() {
+            fetch('/api/logout', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }).then(response => {
+                if(response.ok) {
+                    window.location.replace('/api')
+                }
+            })
+                .catch(error => {
+                    console.error('Error during logout: ', error);
+                });
         }
     </script>
 </head>
