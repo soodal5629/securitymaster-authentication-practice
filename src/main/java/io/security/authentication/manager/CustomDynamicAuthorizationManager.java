@@ -1,6 +1,8 @@
 package io.security.authentication.manager;
 
+import io.security.authentication.admin.repository.ResourceRepository;
 import io.security.authentication.mapper.MapBasedUrlRoleMapper;
+import io.security.authentication.mapper.PersistentUrlRoleMapper;
 import io.security.authentication.service.DynamicAuthorizationService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -23,13 +25,16 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CustomDynamicAuthorizationManager implements AuthorizationManager {
     private List<RequestMatcherEntry<AuthorizationManager<RequestAuthorizationContext>>> mappings;
-    private static final AuthorizationDecision DENY = new AuthorizationDecision(false);
+    // private static final AuthorizationDecision DENY = new AuthorizationDecision(false);
+    private static AuthorizationDecision ACCESS = new AuthorizationDecision(true);
     private final HandlerMappingIntrospector introspector;
+    private final ResourceRepository resourceRepository;
 
     @PostConstruct
     public void mapping() {
-        DynamicAuthorizationService dynamicAuthorizationService = new DynamicAuthorizationService(new MapBasedUrlRoleMapper());
-        mappings = dynamicAuthorizationService.getUrlRoleMappings()
+        //DynamicAuthorizationService dynamicAuthorizationService = new DynamicAuthorizationService(new MapBasedUrlRoleMapper());
+        DynamicAuthorizationService dynamicAuthorizationService = new DynamicAuthorizationService(new PersistentUrlRoleMapper(resourceRepository));
+         mappings = dynamicAuthorizationService.getUrlRoleMappings()
                 .entrySet().stream()
                 .map(entry -> new RequestMatcherEntry<>(new MvcRequestMatcher(introspector, entry.getKey()), customAuthorizationManager(entry.getValue())))
                 .collect(Collectors.toList());
@@ -49,6 +54,7 @@ public class CustomDynamicAuthorizationManager implements AuthorizationManager {
     @Override
     public AuthorizationDecision check(Supplier authentication, Object object) {
         RequestAuthorizationContext request = (RequestAuthorizationContext) object;
+
         for (RequestMatcherEntry<AuthorizationManager<RequestAuthorizationContext>> mapping : this.mappings) { // 모든 인가 설정을 체크한다
             RequestMatcher matcher = mapping.getRequestMatcher();
             RequestMatcher.MatchResult matchResult = matcher.matcher(request.getRequest()); // RequestMatcher(/user) 와 request Url 이 일치하는지 검사
@@ -59,7 +65,9 @@ public class CustomDynamicAuthorizationManager implements AuthorizationManager {
             }
         }
         // mappings에 맞지 않는 request는 deny 한다.
-        return DENY;
+        // return DENY;
+        // 이전 버젼에서는 mappings에 맞지 않는 request는 통과시킴
+        return ACCESS;
     }
 
     @Override
