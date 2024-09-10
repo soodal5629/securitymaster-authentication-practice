@@ -3,6 +3,7 @@ package io.security.authentication.admin.service.impl;
 import io.security.authentication.admin.domain.entity.Resource;
 import io.security.authentication.admin.repository.ResourceRepository;
 import io.security.authentication.admin.service.ResourceService;
+import io.security.authentication.manager.CustomDynamicAuthorizationManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
@@ -16,6 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ResourceServiceImpl implements ResourceService {
     private final ResourceRepository resourceRepository;
+    private final CustomDynamicAuthorizationManager authorizationManager;
 
     @Transactional
     public Resource getResource(long id) {
@@ -30,10 +32,12 @@ public class ResourceServiceImpl implements ResourceService {
     @Transactional
     public void createResource(Resource resource) {
         resourceRepository.save(resource);
+        authorizationManager.reload();
     }
 
     @Transactional
     public void deleteResource(long id) {
         resourceRepository.deleteById(id);
+        authorizationManager.reload();
     }
 }

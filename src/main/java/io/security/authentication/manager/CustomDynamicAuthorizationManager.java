@@ -29,15 +29,20 @@ public class CustomDynamicAuthorizationManager implements AuthorizationManager {
     private static AuthorizationDecision ACCESS = new AuthorizationDecision(true);
     private final HandlerMappingIntrospector introspector;
     private final ResourceRepository resourceRepository;
+    DynamicAuthorizationService dynamicAuthorizationService;
 
     @PostConstruct
     public void mapping() {
         //DynamicAuthorizationService dynamicAuthorizationService = new DynamicAuthorizationService(new MapBasedUrlRoleMapper());
-        DynamicAuthorizationService dynamicAuthorizationService = new DynamicAuthorizationService(new PersistentUrlRoleMapper(resourceRepository));
-         mappings = dynamicAuthorizationService.getUrlRoleMappings()
-                .entrySet().stream()
-                .map(entry -> new RequestMatcherEntry<>(new MvcRequestMatcher(introspector, entry.getKey()), customAuthorizationManager(entry.getValue())))
-                .collect(Collectors.toList());
+         dynamicAuthorizationService = new DynamicAuthorizationService(new PersistentUrlRoleMapper(resourceRepository));
+        setMapping();
+    }
+
+    private void setMapping() {
+        mappings = dynamicAuthorizationService.getUrlRoleMappings()
+               .entrySet().stream()
+               .map(entry -> new RequestMatcherEntry<>(new MvcRequestMatcher(introspector, entry.getKey()), customAuthorizationManager(entry.getValue())))
+               .collect(Collectors.toList());
     }
 
     private AuthorizationManager<RequestAuthorizationContext> customAuthorizationManager(String role) {
@@ -73,5 +78,11 @@ public class CustomDynamicAuthorizationManager implements AuthorizationManager {
     @Override
     public void verify(Supplier authentication, Object object) {
         AuthorizationManager.super.verify(authentication, object);
+    }
+
+    // synchronized - 여러 사용자가 사용하기 때문에 동시성 문제 해결 및 동기화 처리 할 수 있도록(안정성 ↑)
+    public synchronized void reload() {
+        mappings.clear();
+        setMapping();
     }
 }

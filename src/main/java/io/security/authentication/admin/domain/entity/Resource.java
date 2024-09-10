@@ -7,12 +7,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Getter
+@Setter
 @Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Resource {
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "resource_id")
     private Long id;
     private String resourceName;
