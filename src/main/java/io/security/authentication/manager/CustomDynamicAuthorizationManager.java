@@ -6,9 +6,12 @@ import io.security.authentication.mapper.PersistentUrlRoleMapper;
 import io.security.authentication.service.DynamicAuthorizationService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authorization.AuthorityAuthorizationManager;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
+import org.springframework.security.web.access.expression.DefaultHttpSecurityExpressionHandler;
 import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
@@ -30,6 +33,7 @@ public class CustomDynamicAuthorizationManager implements AuthorizationManager {
     private final HandlerMappingIntrospector introspector;
     private final ResourceRepository resourceRepository;
     DynamicAuthorizationService dynamicAuthorizationService;
+    private final RoleHierarchyImpl roleHierarchy;
 
     @PostConstruct
     public void mapping() {
@@ -46,14 +50,25 @@ public class CustomDynamicAuthorizationManager implements AuthorizationManager {
     }
 
     private AuthorizationManager<RequestAuthorizationContext> customAuthorizationManager(String role) {
-        if (role != null) {
+        //if (role != null) {
             if(role.startsWith("ROLE")) {
-                return AuthorityAuthorizationManager.hasAuthority(role);
+                //return AuthorityAuthorizationManager.hasAuthority(role);
+                AuthorityAuthorizationManager<RequestAuthorizationContext> authorityAuthorizationManager =
+                        AuthorityAuthorizationManager.hasAuthority(role);
+                // 계층 권한 적용해줘야 함
+                authorityAuthorizationManager.setRoleHierarchy(roleHierarchy);
+                return authorityAuthorizationManager;
             } else { // 표현식
-                return new WebExpressionAuthorizationManager(role);
+                //return new WebExpressionAuthorizationManager(role);
+                // 계층 권한 적용해줘야 함
+                DefaultHttpSecurityExpressionHandler handler = new DefaultHttpSecurityExpressionHandler();
+                handler.setRoleHierarchy(roleHierarchy);
+                WebExpressionAuthorizationManager authorizationManager = new WebExpressionAuthorizationManager(role);
+                authorizationManager.setExpressionHandler(handler);
+                return authorizationManager;
             }
-        }
-        return null;
+        //}
+        //return null;
     }
 
     @Override
