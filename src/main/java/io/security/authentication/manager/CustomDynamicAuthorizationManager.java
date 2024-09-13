@@ -7,7 +7,6 @@ import io.security.authentication.service.DynamicAuthorizationService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
-import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authorization.AuthorityAuthorizationManager;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
@@ -33,7 +32,7 @@ public class CustomDynamicAuthorizationManager implements AuthorizationManager {
     private final HandlerMappingIntrospector introspector;
     private final ResourceRepository resourceRepository;
     DynamicAuthorizationService dynamicAuthorizationService;
-    private final RoleHierarchyImpl roleHierarchy;
+    private final RoleHierarchy roleHierarchy;
 
     @PostConstruct
     public void mapping() {
