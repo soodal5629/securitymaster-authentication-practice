@@ -10,6 +10,7 @@ import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.authorization.AuthorityAuthorizationManager;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.web.access.expression.DefaultHttpSecurityExpressionHandler;
 import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
@@ -25,7 +26,7 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-public class CustomDynamicAuthorizationManager implements AuthorizationManager {
+public class CustomDynamicAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
     private List<RequestMatcherEntry<AuthorizationManager<RequestAuthorizationContext>>> mappings;
     // private static final AuthorizationDecision DENY = new AuthorizationDecision(false);
     private static AuthorizationDecision ACCESS = new AuthorizationDecision(true);
@@ -71,7 +72,7 @@ public class CustomDynamicAuthorizationManager implements AuthorizationManager {
     }
 
     @Override
-    public AuthorizationDecision check(Supplier authentication, Object object) {
+    public AuthorizationDecision check(Supplier authentication, RequestAuthorizationContext object) {
         RequestAuthorizationContext request = (RequestAuthorizationContext) object;
 
         for (RequestMatcherEntry<AuthorizationManager<RequestAuthorizationContext>> mapping : this.mappings) { // 모든 인가 설정을 체크한다
@@ -90,7 +91,7 @@ public class CustomDynamicAuthorizationManager implements AuthorizationManager {
     }
 
     @Override
-    public void verify(Supplier authentication, Object object) {
+    public void verify(Supplier authentication, RequestAuthorizationContext object) {
         AuthorizationManager.super.verify(authentication, object);
     }
 
@@ -99,4 +100,5 @@ public class CustomDynamicAuthorizationManager implements AuthorizationManager {
         mappings.clear();
         setMapping();
     }
+
 }

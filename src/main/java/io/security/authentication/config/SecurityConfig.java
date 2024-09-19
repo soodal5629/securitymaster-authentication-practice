@@ -2,6 +2,7 @@ package io.security.authentication.config;
 
 import io.security.authentication.dsl.RestApiDsl;
 import io.security.authentication.entrypoint.RestAuthenticationEntryPoint;
+import io.security.authentication.filters.CustomAuthorizationFilter;
 import io.security.authentication.filters.RestAuthenticationFilter;
 import io.security.authentication.handler.FormAccessDeniedHandler;
 import io.security.authentication.handler.FormAuthenticationFailureHandler;
@@ -25,6 +26,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -43,8 +45,8 @@ public class SecurityConfig {
     private final AuthenticationProvider restAuthenticationProvider;
     private final AuthenticationSuccessHandler restSuccessHandler;
     private final AuthenticationFailureHandler restFailureHandler;
-    private final AuthorizationManager<RequestAuthorizationContext> authorizationManager;
-
+    //private final AuthorizationManager<RequestAuthorizationContext> authorizationManager;
+    private final AuthorizationManager<HttpServletRequest> authorizationManager;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth -> auth
@@ -54,8 +56,10 @@ public class SecurityConfig {
 //                .requestMatchers("/manager").hasRole("MANAGER")
 //                .requestMatchers("/admin").hasRole("ADMIN")
 //                .anyRequest().authenticated()
-                    // 프로그래밍 방식으로 인가 설정 (1. Map 방식)
-                    .anyRequest().access(authorizationManager)
+                    // 프로그래밍 방식으로 인가 설정 (1. Map 방식, 2. DB 방식)
+                    //.anyRequest().access(authorizationManager)
+                // 어떤 요청이 오든 CustomAuthorizationFilter가 받을 수 있도록
+                                .anyRequest().permitAll()
                 )
             .formLogin(form -> form
                     .loginPage("/login").permitAll()
@@ -67,10 +71,20 @@ public class SecurityConfig {
             .authenticationProvider(formAuthenticationProvider)
             .exceptionHandling(e -> e.accessDeniedHandler(new FormAccessDeniedHandler("/denied")))
             //.userDetailsService(userDetailsService)
+                .addFilterAfter(customAuthorizationFilter(null), ExceptionTranslationFilter.class)
         ;
         return http.build();
     }
 
+    /**
+     * 커스텀 필터 추가
+     * - 모든 요청에 대해 시큐리티에서 제공하는 AuthorizationFilter가 아닌, 우리가 만든 custom filter가 바로 받을 수 있음
+     * - 시큐리티에서 제공하는 AuthorizationFilter조차 타지 않도록 조치
+     */
+    @Bean
+    public CustomAuthorizationFilter customAuthorizationFilter(HttpSecurity http) {
+        return new CustomAuthorizationFilter(authorizationManager);
+    }
     // rest 인증 보안 (위의 form 인증 방식 securityFilterChain 까지 합해서 다중 보안 처리)
     @Bean
     @Order(1)
